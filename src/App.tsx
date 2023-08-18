@@ -1,37 +1,48 @@
-import React, { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import elbrusLogo from './assets/elbrus.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { Container, Row } from 'react-bootstrap';
+import axios from 'axios';
+import SearchForm from './components/SearchForm';
+import CardList from './components/CardList';
+import type { DatePickerType } from './types/datepicker';
+import type { QueryOptions } from './types/query';
+import type { ApiReturnType, MatchType } from './types/matches';
 
-function App(): JSX.Element {
-  const [count, setCount] = useState(0);
+export default function App(): JSX.Element {
+  // const [period, setPeriod] = useState<DatePickerType>({ from: '', to: '' });
+  const [matches, setMatches] = useState<MatchType[]>([]);
+  const [queryOptions, setQueryOptions] = useState<QueryOptions>({
+    method: 'GET',
+    url: 'http://livescore-api.com/api-client/scores/history.json',
+    params: {
+      key: 'nASgnAGMe0IctTUW',
+      secret: 'M3HfAbCq4SSB43VrDNI1ooOCoxPRqJNd',
+      from: '2023-08-17',
+      to: (new Date()).toISOString().split('T')[0],
+    },
+  });
+
+  const submitHandler = (input: DatePickerType): void => {
+    setQueryOptions(prev => ({...prev, from: input.from, to: input.to}))
+  };
+
+  useEffect(() => {
+    axios
+      .request<ApiReturnType>(queryOptions)
+      .then((response) => setMatches(prev => [...response.data.data.match]))
+      .catch(console.error);
+  }, [queryOptions]);
+
+  console.log(queryOptions);
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://github.com/Elbrus-Bootcamp" target="_blank" rel="noreferrer">
-          <img src={elbrusLogo} className="logo elbrus" alt="Elbrus logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h2>Elbrus Bootcamp</h2>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button type="button" onClick={() => setCount((prev) => prev + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-    </div>
+    <Container className="mt-3">
+      <Row>
+        <h1>Выберите период проведения матчей</h1>
+        <SearchForm submitHandler={submitHandler} />
+      </Row>
+      <Row className="mt-4">
+        <CardList matches={matches} />
+      </Row>
+    </Container>
   );
 }
-
-export default App;
