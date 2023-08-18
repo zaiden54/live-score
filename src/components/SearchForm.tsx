@@ -8,9 +8,11 @@ type SelectFormProps = {
 
 export default function SearchForm({ submitHandler }: SelectFormProps): JSX.Element {
   const [input, setInput] = useState<DatePickerType>({ from: '', to: '' });
+
   const inputHandler: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     setInput((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   };
+
   return (
     <Form
       onSubmit={(event) => {
